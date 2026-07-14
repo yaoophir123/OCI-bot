@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OCI Bot — Orientis Conseil International</title>
+<meta name="description" content="OCI Bot — Assistant virtuel officiel d'Orientis Conseil International : Études, Voyage, Santé, Conseil & RH.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy-950:#040c1c;
+  --navy-900:#071A3D;
+  --navy-850:#0a2249;
+  --navy-800:#0d2a5e;
+  --navy-700:#123469;
+  --navy-600:#1a4180;
+  --surface:#0a1d40;
+  --card:#0f2549;
+  --card-2:#122c56;
+  --border:#1f3a68;
+  --border-soft:rgba(217,188,90,.16);
+  --border-gold:rgba(217,188,90,.38);
+  --gold:#D9BC5A;
+  --gold-deep:#AC8A1F;
+  --gold-dark:#8A6F19;
+  --gold-soft:rgba(217,188,90,.12);
+  --text:#eef2fa;
+  --text-dim:#c5d1e6;
+  --muted:#8ba0c4;
+  --green:#3ecf8e;
+  --orange:#e8a33d;
+  --red:#e5586b;
+  --radius:18px;
+  --radius-sm:11px;
+  --font-d:'Montserrat',sans-serif;
+  --font-b:'Open Sans',sans-serif;
+  --shadow:0 20px 60px rgba(2,7,20,.55);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:var(--font-b);background:var(--navy-950);color:var(--text);
+  height:100dvh;overflow:hidden;
+}
+button,input,select,textarea{font-family:inherit}
+button{cursor:pointer}
+a{color:inherit}
+::selection{background:var(--gold);color:var(--navy-950)}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* ═══════════ VIEWS SCAFFOLD ═══════════ */
+.view{display:none;height:100dvh;width:100%}
+.view.active{display:flex}
+
+/* ═══════════ SHARED DECOR ═══════════ */
+.bg-texture{
+  position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:radial-gradient(circle at 18% 22%, rgba(217,188,90,.10), transparent 42%),
+                    radial-gradient(circle at 82% 78%, rgba(18,52,105,.55), transparent 45%),
+                    linear-gradient(160deg, var(--navy-950) 0%, var(--navy-900) 55%, var(--navy-850) 100%);
+}
+.compass{display:block;filter:drop-shadow(0 0 18px rgba(217,188,90,.35))}
+.compass-spin{animation:spin 40s linear infinite}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.hairline{height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.55}
+
+/* ═══════════ AUTH VIEW ═══════════ */
+#view-auth{position:relative;width:100%;overflow:hidden}
+.auth-shell{display:flex;width:100%;height:100%;position:relative;z-index:1}
+.auth-hero{
+  flex:0 0 42%;position:relative;display:flex;flex-direction:column;justify-content:space-between;
+  padding:48px 44px;overflow:hidden;border-right:1px solid var(--border-soft);
+}
+.auth-hero::before{content:'';position:absolute;inset:0;background:var(--navy-950);z-index:-2}
+.auth-hero .bg-texture{z-index:-1}
+.auth-hero-top{position:relative;z-index:2}
+.brand-mark{display:flex;align-items:center;gap:14px;margin-bottom:56px}
+.brand-mark .logo-icon{
+  width:52px;height:52px;border-radius:14px;background:linear-gradient(150deg,var(--navy-800),var(--navy-700));
+  border:1px solid var(--border-gold);display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.brand-txt .b1{font-family:var(--font-d);font-weight:800;font-size:15px;letter-spacing:.06em;color:var(--text)}
+.brand-txt .b2{font-family:var(--font-d);font-weight:600;font-size:10px;letter-spacing:.22em;color:var(--gold)}
+.auth-hero-mid{position:relative;z-index:2;margin-top:20px}
+.auth-hero-mid h1{font-family:var(--font-d);font-size:clamp(30px,3.4vw,42px);font-weight:800;line-height:1.12;letter-spacing:-.01em}
+.auth-hero-mid h1 span{color:var(--gold);display:block}
+.auth-hero-mid p.tag{margin-top:16px;color:var(--text-dim);font-size:14.5px;line-height:1.65;max-width:400px}
+.pole-list{margin-top:38px;display:flex;flex-direction:column;gap:14px;max-width:400px}
+.pole-item{display:flex;align-items:center;gap:14px;padding:12px 14px;border:1px solid var(--border-soft);border-radius:var(--radius-sm);background:rgba(255,255,255,.02);transition:.25s}
+.pole-item:hover{border-color:var(--border-gold);background:rgba(217,188,90,.05)}
+.pole-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pole-ico.gold{background:linear-gradient(140deg,var(--gold-deep),var(--gold))}
+.pole-ico.navy{background:linear-gradient(140deg,var(--navy-700),var(--navy-600));border:1px solid var(--border-gold)}
+.pole-item h4{font-family:var(--font-d);font-size:13.5px;font-weight:700}
+.pole-item p{font-size:11.5px;color:var(--muted);margin-top:1px}
+.auth-hero-bottom{position:relative;z-index:2;font-size:11.5px;color:var(--muted);line-height:1.8}
+.auth-hero-bottom b{color:var(--text-dim)}
+.compass-watermark{position:absolute;right:-90px;bottom:-90px;opacity:.08;z-index:0}
+
+.auth-form-side{flex:1;display:flex;align-items:center;justify-content:center;padding:32px;overflow-y:auto;position:relative}
+.auth-form-side .bg-texture{opacity:.25}
+.auth-card{
+  position:relative;z-index:1;width:100%;max-width:460px;background:rgba(15,37,73,.55);
+  border:1px solid var(--border-gold);border-radius:24px;padding:38px 36px;backdrop-filter:blur(18px);
+  box-shadow:var(--shadow);
+}
+.auth-tabs{display:flex;background:var(--navy-950);border:1px solid var(--border);border-radius:30px;padding:4px;margin-bottom:26px}
+.auth-tab{flex:1;text-align:center;padding:9px 10px;border:none;background:transparent;color:var(--muted);border-radius:26px;font-size:12.5px;font-weight:700;letter-spacing:.02em;transition:.2s}
+.auth-tab.active{background:linear-gradient(135deg,var(--gold-deep),var(--gold));color:var(--navy-950)}
+.auth-card h2{font-family:var(--font-d);font-size:21px;font-weight:800}
+.auth-card .sub{font-size:12.5px;color:var(--muted);margin-top:5px;margin-bottom:24px;line-height:1.55}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{margin-bottom:15px}
+.field label{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--gold);margin-bottom:6px;text-transform:uppercase}
+.field input,.field select{
+  width:100%;padding:12px 14px;background:var(--navy-950);border:1px solid var(--border);border-radius:11px;
+  color:var(--text);font-size:14px;transition:.2s;
+}
+.field input::placeholder{color:#5a6f92}
+.field input:focus,.field select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,188,90,.14)}
+.field select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238ba0c4' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.field-error{font-size:11px;color:var(--red);margin-top:5px;display:none}
+.field.invalid input,.field.invalid select{border-color:var(--red)}
+.field.invalid .field-error{display:block}
+.btn-gold{
+  width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--gold-deep),var(--gold));
+  color:var(--navy-950);font-family:var(--font-d);font-weight:800;font-size:14.5px;letter-spacing:.01em;
+  display:flex;align-items:center;justify-content:center;gap:8px;transition:.2s;margin-top:8px;
+}
+.btn-gold:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 10px 30px rgba(217,188,90,.22)}
+.btn-gold:disabled{opacity:.55;cursor:default;transform:none}
+.auth-foot-note{text-align:center;font-size:11px;color:var(--muted);margin-top:16px;line-height:1.6}
+.auth-alert{font-size:12px;padding:10px 13px;border-radius:10px;margin-bottom:16px;display:none}
+.auth-alert.show{display:block}
+.auth-alert.error{background:rgba(229,88,107,.12);border:1px solid rgba(229,88,107,.4);color:#ff9aa6}
+.auth-alert.success{background:rgba(62,207,142,.12);border:1px solid rgba(62,207,142,.4);color:#8ce7bb}
+.pane{display:none}
+.pane.active{display:block}
+
+/* ═══════════ FLOATING ADMIN LINK ═══════════ */
+.admin-float{
+  position:fixed;left:18px;bottom:16px;z-index:60;background:rgba(10,29,64,.75);border:1px solid var(--border-soft);
+  color:var(--muted);font-size:11px;padding:8px 13px;border-radius:20px;backdrop-filter:blur(8px);
+  display:flex;align-items:center;gap:6px;transition:.2s;
+}
+.admin-float:hover{border-color:var(--border-gold);color:var(--gold)}
+
+/* ═══════════ CHAT VIEW ═══════════ */
+#view-chat{flex-direction:column;background:var(--navy-950)}
+header.top{
+  background:linear-gradient(90deg,var(--navy-900),var(--navy-850));border-bottom:1px solid var(--border-soft);
+  padding:0 22px;height:66px;display:flex;align-items:center;gap:14px;flex-shrink:0;z-index:10;
+}
+.logo-wrap{width:42px;height:42px;border-radius:12px;background:linear-gradient(145deg,var(--gold-deep),var(--gold));display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.header-text h1{font-family:var(--font-d);font-size:15.5px;font-weight:800;letter-spacing:.01em}
+.header-text p{font-size:10.5px;color:var(--muted);letter-spacing:.01em}
+.status-dot{width:7px;height:7px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:8px;position:relative}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);padding:8px 14px;border-radius:9px;font-size:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.profile-pop{position:absolute;top:52px;right:0;background:var(--card);border:1px solid var(--border-gold);border-radius:14px;padding:16px;width:250px;box-shadow:var(--shadow);display:none;z-index:40}
+.profile-pop.open{display:block}
+.profile-pop .pp-name{font-family:var(--font-d);font-weight:800;font-size:14px}
+.profile-pop .pp-line{font-size:11.5px;color:var(--muted);margin-top:8px;display:flex;justify-content:space-between;gap:8px}
+.profile-pop .pp-line b{color:var(--text-dim);font-weight:600}
+.profile-pop button{width:100%;margin-top:14px;background:transparent;border:1px solid var(--border);color:var(--muted);padding:9px;border-radius:9px;font-size:12px}
+.profile-pop button:hover{border-color:var(--red);color:#ff9aa6}
+
+.layout{display:flex;flex:1;overflow:hidden}
+aside.left{width:238px;background:var(--surface);border-right:1px solid var(--border-soft);display:flex;flex-direction:column;padding:16px 12px;gap:6px;flex-shrink:0;overflow-y:auto}
+aside h3{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700;padding:6px 8px 8px}
+.pole-tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:0 2px 10px}
+.pole-tab{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:10px 8px;text-align:center;transition:.2s}
+.pole-tab .pt-ico{font-size:16px;margin-bottom:4px}
+.pole-tab .pt-label{font-size:10px;font-weight:700;color:var(--text-dim);line-height:1.25}
+.pole-tab:hover{border-color:var(--border-gold)}
+.pole-tab.active{border-color:var(--gold);background:linear-gradient(135deg,rgba(217,188,90,.14),rgba(217,188,90,.04))}
+.pole-tab.active .pt-label{color:var(--gold)}
+.quick-btn{background:transparent;border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:10px;font-size:12px;text-align:left;transition:all .2s;line-height:1.4;display:flex;align-items:flex-start;gap:8px}
+.quick-btn:hover{background:var(--card);border-color:var(--gold);color:var(--gold)}
+.quick-btn .qico{font-size:13px;flex-shrink:0}
+.divider{height:1px;background:var(--border);margin:8px 0}
+
+main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+#messages{flex:1;overflow-y:auto;padding:26px 22px;display:flex;flex-direction:column;gap:16px;scroll-behavior:smooth}
+#messages::-webkit-scrollbar{width:5px}
+#messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+.welcome-card{
+  background:linear-gradient(150deg,var(--navy-900) 0%,var(--navy-850) 55%,#0c1f3d 100%);
+  border:1px solid var(--border-gold);border-radius:var(--radius);padding:30px 26px;text-align:center;margin-bottom:4px;position:relative;overflow:hidden;
+}
+.welcome-card .wc-decor{position:absolute;right:-40px;top:-40px;opacity:.10}
+.wc-icon{width:58px;height:58px;background:linear-gradient(145deg,var(--gold-deep),var(--gold));border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;position:relative;z-index:1}
+.welcome-card h2{font-family:var(--font-d);font-size:20px;font-weight:800;margin-bottom:8px;position:relative;z-index:1}
+.welcome-card p{font-size:13px;color:var(--muted);line-height:1.65;max-width:500px;margin:0 auto 18px;position:relative;z-index:1}
+.tag-list{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;position:relative;z-index:1}
+.tag{background:var(--card);border:1px solid var(--border-gold);border-radius:20px;padding:6px 14px;font-size:11.5px;color:var(--gold);font-weight:600}
+
+.msg{display:flex;gap:10px;max-width:740px;animation:fadeUp .25s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{flex-direction:row-reverse;margin-left:auto}
+.avatar{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;align-self:flex-end}
+.avatar.bot{background:linear-gradient(145deg,var(--gold-deep),var(--gold));color:var(--navy-950)}
+.avatar.user{background:linear-gradient(145deg,var(--navy-700),var(--navy-600));color:var(--gold);border:1px solid var(--border-gold)}
+.bubble{padding:13px 16px;border-radius:14px;font-size:14px;line-height:1.65;max-width:calc(100% - 50px);word-break:break-word}
+.msg.bot .bubble{background:var(--card);border:1px solid var(--border);border-bottom-left-radius:4px}
+.msg.user .bubble{background:linear-gradient(135deg,#1a3a6c,#0f2a52);border:1px solid var(--border-gold);border-bottom-right-radius:4px;color:#f4f7fc}
+.bubble strong{color:var(--gold)}
+.bubble em{color:var(--gold);font-style:normal;font-weight:600}
+.bubble ul{padding-left:18px;margin:6px 0}
+.bubble li{margin-bottom:4px}
+.bubble h4{color:var(--gold);font-size:13px;margin:10px 0 4px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{background:transparent;border:1px solid var(--border);color:var(--gold);padding:6px 13px;border-radius:20px;font-size:12px;transition:all .2s}
+.chip:hover{background:var(--gold);color:var(--navy-950);border-color:var(--gold)}
+.typing-indicator{display:flex;gap:4px;align-items:center;padding:14px 16px}
+.typing-indicator span{width:6px;height:6px;background:var(--gold);border-radius:50%;animation:bounce 1.2s infinite}
+.typing-indicator span:nth-child(2){animation-delay:.2s}
+.typing-indicator span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-5px);opacity:1}}
+
+.transfer-card{background:linear-gradient(135deg,#08331f,#0b4a2c);border:1.5px solid var(--green);border-radius:var(--radius);padding:18px 20px;animation:fadeUp .3s ease;max-width:calc(100% - 50px)}
+.transfer-card .t-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.transfer-card .t-ico{width:38px;height:38px;background:var(--green);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.transfer-card h3{font-size:14px;font-weight:800}
+.transfer-card p{font-size:12px;color:#a8e0c4;line-height:1.55}
+.transfer-card .t-meta{font-size:10px;color:#6fc79b;margin-top:8px;border-top:1px dashed rgba(62,207,142,.3);padding-top:8px}
+
+.cta-card{background:linear-gradient(135deg,#2b2005,#3d2c07);border:1.5px solid var(--gold);border-radius:var(--radius);padding:20px 22px;animation:fadeUp .3s ease;max-width:calc(100% - 50px)}
+.cta-card .cta-top{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.cta-icon{width:44px;height:44px;background:linear-gradient(145deg,var(--gold-deep),var(--gold));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.cta-card h3{font-size:15px;font-weight:800;color:var(--text)}
+.cta-card p{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:14px}
+.cta-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:linear-gradient(135deg,var(--gold-deep),var(--gold));border:none;border-radius:10px;color:var(--navy-950);font-size:14px;font-weight:700;text-decoration:none;transition:all .2s}
+.cta-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.cta-note{font-size:11px;color:var(--muted);text-align:center;margin-top:10px}
+
+.input-bar{padding:14px 22px 18px;background:var(--surface);border-top:1px solid var(--border-soft);flex-shrink:0}
+.input-wrap{display:flex;align-items:flex-end;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 12px 10px 16px;transition:border-color .2s}
+.input-wrap:focus-within{border-color:var(--gold)}
+#input{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:14px;resize:none;max-height:120px;line-height:1.5}
+#input::placeholder{color:var(--muted)}
+.send-btn{width:36px;height:36px;background:linear-gradient(145deg,var(--gold-deep),var(--gold));border:none;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;color:var(--navy-950)}
+.send-btn:hover{filter:brightness(1.08);transform:scale(1.05)}
+.send-btn:disabled{background:var(--border);color:var(--muted);cursor:default;transform:none}
+.send-btn svg{width:16px;height:16px}
+.input-hint{text-align:center;font-size:11px;color:var(--muted);margin-top:8px}
+.input-hint strong{color:var(--gold)}
+
+/* ── CRM PANEL ── */
+aside.crm{width:272px;background:var(--surface);border-left:1px solid var(--border-soft);flex-shrink:0;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:12px}
+.crm-head{display:flex;align-items:center;justify-content:space-between}
+.crm-head h3{padding:0}
+.crm-id{font-size:10px;color:var(--muted);background:var(--card);border:1px solid var(--border);padding:3px 8px;border-radius:6px}
+.account-block{background:var(--card);border:1px solid var(--border-gold);border-radius:12px;padding:13px}
+.account-block .ab-name{font-family:var(--font-d);font-weight:800;font-size:13.5px}
+.account-block .ab-line{font-size:11px;color:var(--muted);margin-top:5px;display:flex;gap:6px;align-items:center}
+.score-block{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px}
+.score-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
+.score-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700}
+.score-val{font-size:26px;font-weight:800;color:var(--text);font-family:var(--font-d)}
+.score-val small{font-size:12px;color:var(--muted);font-weight:400}
+.score-bar{height:8px;background:var(--navy-950);border-radius:4px;overflow:hidden;margin-bottom:10px}
+.score-fill{height:100%;width:0%;border-radius:4px;background:var(--muted);transition:width .6s ease, background .6s ease}
+.lead-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;border:1px solid var(--border);color:var(--muted)}
+.lead-badge.froid{border-color:var(--border);color:var(--muted)}
+.lead-badge.tiede{border-color:var(--orange);color:var(--orange)}
+.lead-badge.chaud{border-color:var(--green);color:var(--green)}
+.crm-fields{display:flex;flex-direction:column;gap:8px}
+.crm-field{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px 12px}
+.crm-field .fl{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;margin-bottom:3px;display:flex;align-items:center;gap:5px}
+.crm-field .fv{font-size:12px;font-weight:600;line-height:1.35;color:var(--text)}
+.crm-field .fv.empty{color:var(--muted);font-weight:400;font-style:italic}
+.crm-field.filled{border-color:var(--border-gold)}
+.crm-note{font-size:10px;color:var(--muted);line-height:1.55;text-align:center;padding:0 4px}
+
+/* ── MODAL DASHBOARD ── */
+.modal-bg{position:fixed;inset:0;background:rgba(3,7,18,.82);display:none;align-items:center;justify-content:center;z-index:80;padding:20px}
+.modal-bg.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border-gold);border-radius:18px;width:100%;max-width:580px;padding:24px;animation:fadeUp .25s ease;max-height:88dvh;overflow-y:auto}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.modal-head h2{font-family:var(--font-d);font-size:16px;font-weight:800}
+.modal-sub{font-size:11px;color:var(--muted);margin-bottom:16px}
+.modal-close{background:none;border:none;color:var(--muted);font-size:20px;padding:4px 8px}
+.modal-close:hover{color:var(--gold)}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px 12px}
+.stat .sv{font-family:var(--font-d);font-size:21px;font-weight:800;color:var(--gold)}
+.stat .sl{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.35}
+.modal-foot{font-size:10px;color:var(--muted);text-align:center;line-height:1.6;border-top:1px solid var(--border);padding-top:12px}
+
+/* ═══════════ ADMIN VIEWS ═══════════ */
+#view-admin-login{align-items:center;justify-content:center;position:relative}
+#view-admin-login .bg-texture{opacity:.6}
+.admin-login-card{position:relative;z-index:1;width:100%;max-width:380px;background:rgba(15,37,73,.6);border:1px solid var(--border-gold);border-radius:22px;padding:36px 32px;backdrop-filter:blur(16px);box-shadow:var(--shadow);text-align:center}
+.admin-login-card .ai{width:54px;height:54px;border-radius:14px;background:linear-gradient(145deg,var(--navy-700),var(--navy-600));border:1px solid var(--border-gold);display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.admin-login-card h2{font-family:var(--font-d);font-size:19px;font-weight:800}
+.admin-login-card .sub{font-size:12px;color:var(--muted);margin:6px 0 22px;line-height:1.5}
+.admin-login-card .field{text-align:left}
+.back-link{display:inline-block;margin-top:18px;font-size:12px;color:var(--muted)}
+.back-link:hover{color:var(--gold)}
+
+#view-admin{flex-direction:column;background:var(--navy-950);overflow-y:auto}
+.admin-top{background:linear-gradient(90deg,var(--navy-900),var(--navy-850));border-bottom:1px solid var(--border-soft);padding:0 26px;height:66px;display:flex;align-items:center;gap:14px;flex-shrink:0}
+.admin-top h1{font-family:var(--font-d);font-size:16px;font-weight:800}
+.admin-top p{font-size:10.5px;color:var(--muted)}
+.admin-body{padding:26px;flex:1}
+.admin-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px}
+.kpi .kv{font-family:var(--font-d);font-size:26px;font-weight:800;color:var(--gold)}
+.kpi .kl{font-size:11px;color:var(--muted);margin-top:4px}
+.admin-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.admin-toolbar input,.admin-toolbar select{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 13px;color:var(--text);font-size:12.5px}
+.admin-toolbar input{flex:1;min-width:200px}
+.admin-toolbar input:focus,.admin-toolbar select:focus{outline:none;border-color:var(--gold)}
+.btn-outline{background:transparent;border:1px solid var(--border-gold);color:var(--gold);padding:10px 16px;border-radius:10px;font-size:12.5px;font-weight:700}
+.btn-outline:hover{background:var(--gold-soft)}
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:13px 14px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02)}
+tbody td{padding:13px 14px;font-size:12.5px;border-bottom:1px solid var(--border);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:rgba(217,188,90,.03)}
+.td-name{font-weight:700}
+.td-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.score-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:800;border:1px solid var(--border)}
+.score-chip.chaud{color:var(--green);border-color:var(--green)}
+.score-chip.tiede{color:var(--orange);border-color:var(--orange)}
+.score-chip.froid{color:var(--muted);border-color:var(--border)}
+.pole-pill{font-size:11px;padding:3px 9px;border-radius:12px;background:var(--gold-soft);color:var(--gold);font-weight:700;display:inline-block}
+.row-actions{display:flex;gap:6px}
+.icon-btn{background:transparent;border:1px solid var(--border);color:var(--muted);width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.icon-btn:hover{border-color:var(--gold);color:var(--gold)}
+.icon-btn.danger:hover{border-color:var(--red);color:#ff9aa6}
+.empty-state{padding:60px 20px;text-align:center;color:var(--muted)}
+.empty-state .es-ico{font-size:34px;margin-bottom:10px}
+.mail-status{font-size:11px}
+.mail-status.sent{color:var(--green)}
+.mail-status.pending{color:var(--muted)}
+
+.transcript-modal .msg-row{padding:9px 12px;border-radius:10px;margin-bottom:7px;font-size:12.5px;line-height:1.5}
+.transcript-modal .msg-row.bot{background:var(--navy-950);border:1px solid var(--border)}
+.transcript-modal .msg-row.user{background:rgba(217,188,90,.06);border:1px solid var(--border-gold)}
+.transcript-modal .msg-row b{color:var(--gold);display:block;font-size:10px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+
+@media(max-width:1120px){aside.crm{display:none}.admin-kpis{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){.auth-hero{display:none}.form-row{grid-template-columns:1fr}}
+@media(max-width:680px){
+  aside.left{display:none}header.top{padding:0 14px}#messages{padding:16px 14px}.input-bar{padding:10px 14px 14px}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}.header-text p{display:none}
+  .admin-body{padding:16px}.admin-kpis{grid-template-columns:1fr 1fr}.table-wrap{overflow-x:auto}table{min-width:720px}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════ VUE 1 : CRÉATION DE COMPTE / CONNEXION ══════════════════════════ -->
+<div class="view active" id="view-auth">
+  <div class="auth-shell">
+
+    <div class="auth-hero">
+      <div class="bg-texture"></div>
+      <svg class="compass compass-watermark compass-spin" width="360" height="360" viewBox="0 0 24 24" fill="none" stroke="#D9BC5A" stroke-width="1"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+
+      <div class="auth-hero-top">
+        <div class="brand-mark">
+          <div class="logo-icon">
+            <svg class="compass" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#D9BC5A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+          </div>
+          <div class="brand-txt"><div class="b1">ORIENTIS CONSEIL</div><div class="b2">INTERNATIONAL</div></div>
+        </div>
+      </div>
+
+      <div class="auth-hero-mid">
+        <h1>OCI Bot<span>Votre conseiller virtuel, 4 univers.</span></h1>
+        <p class="tag">4 univers. 1 vision. Des opportunités sans frontières. Créez votre espace pour échanger librement avec notre assistant intelligent sur vos projets d'études, de voyage, de santé ou de carrière.</p>
+
+        <div class="pole-list">
+          <div class="pole-item">
+            <div class="pole-ico gold"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#071A3D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+            <div><h4>Orientis Études</h4><p>Orientation, admission, visa &amp; logement à l'international</p></div>
+          </div>
+          <div class="pole-item">
+            <div class="pole-ico navy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D9BC5A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+            <div><h4>Orientis Voyage</h4><p>Séjours sur mesure, affaires, pèlerinages &amp; tourisme médical</p></div>
+          </div>
+          <div class="pole-item">
+            <div class="pole-ico gold"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#071A3D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+            <div><h4>Orientis Santé</h4><p>Cliniques de référence à l'étranger, accompagnement complet</p></div>
+          </div>
+          <div class="pole-item">
+            <div class="pole-ico navy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D9BC5A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+            <div><h4>Orientis Conseil &amp; RH</h4><p>Formations, coaching &amp; solutions RH pour entreprises</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-hero-bottom">
+        <b>Angré 8ème Tranche, Abidjan, Côte d'Ivoire</b><br>
+        +225 01 53 22 22 93 · +225 07 14 44 44 49 · infos@orientisconseil.com
+      </div>
+    </div>
+
+    <div class="auth-form-side">
+      <div class="bg-texture"></div>
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <button class="auth-tab active" id="tabCreate" onclick="switchAuthTab('create')">Créer un compte</button>
+          <button class="auth-tab" id="tabLogin" onclick="switchAuthTab('login')">Déjà un compte</button>
+        </div>
+
+        <div id="authAlert" class="auth-alert"></div>
+
+        <!-- Pane : création de compte -->
+        <div class="pane active" id="paneCreate">
+          <h2>Avant de commencer…</h2>
+          <p class="sub">Ces informations nous permettent de personnaliser vos échanges et de vous mettre en relation avec le bon conseiller si besoin.</p>
+          <form id="createForm" novalidate>
+            <div class="form-row">
+              <div class="field" id="f-prenom"><label>Prénom *</label><input type="text" id="in-prenom" placeholder="Ex. Awa" autocomplete="given-name"><div class="field-error">Champ obligatoire</div></div>
+              <div class="field" id="f-nom"><label>Nom *</label><input type="text" id="in-nom" placeholder="Ex. Koné" autocomplete="family-name"><div class="field-error">Champ obligatoire</div></div>
+            </div>
+            <div class="field" id="f-email"><label>Email *</label><input type="email" id="in-email" placeholder="vous@exemple.com" autocomplete="email"><div class="field-error">Email invalide</div></div>
+            <div class="field" id="f-tel"><label>Numéro de téléphone *</label><input type="tel" id="in-tel" placeholder="Ex. 07 14 44 44 49" autocomplete="tel"><div class="field-error">Numéro invalide</div></div>
+            <div class="field" id="f-niveau">
+              <label>Niveau d'étude *</label>
+              <select id="in-niveau">
+                <option value="">Sélectionnez…</option>
+                <option>Collège (avant BEPC)</option>
+                <option>Lycée (Seconde / Première)</option>
+                <option>Terminale / Bac</option>
+                <option>Bac+1 / Bac+2 (BTS, DUT…)</option>
+                <option>Bac+3 (Licence)</option>
+                <option>Bac+4 / Bac+5 (Master)</option>
+                <option>Bac+8 (Doctorat)</option>
+                <option>Jeune diplômé(e)</option>
+                <option>Professionnel(le) en activité</option>
+                <option>Chef d'entreprise / Dirigeant</option>
+                <option>Autre</option>
+              </select>
+              <div class="field-error">Veuillez sélectionner votre niveau</div>
+            </div>
+            <button type="submit" class="btn-gold">Accéder à l'assistant OCI
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </button>
+          </form>
+          <p class="auth-foot-note">En créant votre compte, vous acceptez d'être recontacté(e) par un conseiller Orientis Conseil International au sujet de votre projet.</p>
+        </div>
+
+        <!-- Pane : connexion -->
+        <div class="pane" id="paneLogin">
+          <h2>Retrouver mon espace</h2>
+          <p class="sub">Entrez l'adresse email utilisée lors de la création de votre compte pour reprendre votre conversation.</p>
+          <form id="loginForm" novalidate>
+            <div class="field" id="f-login-email"><label>Email *</label><input type="email" id="in-login-email" placeholder="vous@exemple.com" autocomplete="email"><div class="field-error">Aucun compte trouvé avec cet email</div></div>
+            <button type="submit" class="btn-gold">Retrouver mon espace
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <button class="admin-float" onclick="switchView('admin-login')">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    Espace Administrateur
+  </button>
+</div>
+
+<!-- ══════════════════════════ VUE 2 : CHATBOT ══════════════════════════ -->
+<div class="view" id="view-chat">
+
+  <header class="top">
+    <div class="logo-wrap"><svg class="compass" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#071A3D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
+    <div class="header-text">
+      <h1>OCI Bot</h1>
+      <p>Orientis Conseil International · Assistant virtuel intelligent · 24h/24 – 7j/7</p>
+    </div>
+    <div class="status-dot" title="En ligne"></div>
+    <div class="header-right">
+      <button class="btn-ghost" id="profileBtn" onclick="toggleProfilePop()">👤 <span id="profileBtnName">Mon profil</span></button>
+      <button class="btn-ghost" onclick="openDashboard()">📊 Dashboard</button>
+      <button class="btn-ghost" onclick="resetChat()">↺ Nouvelle conversation</button>
+      <div class="profile-pop" id="profilePop">
+        <div class="pp-name" id="pp-name">—</div>
+        <div class="pp-line"><span>Email</span><b id="pp-email">—</b></div>
+        <div class="pp-line"><span>Téléphone</span><b id="pp-tel">—</b></div>
+        <div class="pp-line"><span>Niveau</span><b id="pp-niveau">—</b></div>
+        <button onclick="logoutUser()">↪ Changer de compte</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <aside class="left">
+      <h3>Nos 4 pôles</h3>
+      <div class="pole-tabs">
+        <button class="pole-tab active" data-pole="all" onclick="selectPoleTab('all')"><div class="pt-ico">✦</div><div class="pt-label">Tout</div></button>
+        <button class="pole-tab" data-pole="etudes" onclick="selectPoleTab('etudes')"><div class="pt-ico">🎓</div><div class="pt-label">Études</div></button>
+        <button class="pole-tab" data-pole="voyages" onclick="selectPoleTab('voyages')"><div class="pt-ico">✈️</div><div class="pt-label">Voyage</div></button>
+        <button class="pole-tab" data-pole="sante" onclick="selectPoleTab('sante')"><div class="pt-ico">🏥</div><div class="pt-label">Santé</div></button>
+        <button class="pole-tab" data-pole="conseil" onclick="selectPoleTab('conseil')" style="grid-column:1/-1"><div class="pt-ico">💼</div><div class="pt-label">Conseil &amp; RH</div></button>
+      </div>
+      <div class="divider"></div>
+      <h3 id="quickTitle">Questions rapides</h3>
+      <div id="quickList"></div>
+      <div class="divider"></div>
+      <button class="quick-btn" onclick="sendQuick('Je veux parler à un conseiller humain')"><span class="qico">📞</span>Parler à un conseiller</button>
+      <button class="quick-btn" onclick="sendQuick('Je suis prêt à me lancer, comment commencer ?')"><span class="qico">🚀</span>Je suis prêt à démarrer</button>
+    </aside>
+
+    <main>
+      <div id="messages"></div>
+      <div class="input-bar">
+        <div class="input-wrap">
+          <textarea id="input" rows="1" placeholder="Posez votre question librement, je comprends le langage naturel…" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+          <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Envoyer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+          </button>
+        </div>
+        <p class="input-hint">Propulsé par l'IA · <strong>Orientis Conseil International</strong> · Abidjan, Côte d'Ivoire</p>
+      </div>
+    </main>
+
+    <aside class="crm">
+      <div class="crm-head">
+        <h3>🗂️ Fiche prospect</h3>
+        <span class="crm-id" id="crmId">OCI-0000</span>
+      </div>
+
+      <div class="account-block">
+        <div class="ab-name" id="ab-name">—</div>
+        <div class="ab-line">✉️ <span id="ab-email">—</span></div>
+        <div class="ab-line">📱 <span id="ab-tel">—</span></div>
+        <div class="ab-line">🎓 <span id="ab-niveau">—</span></div>
+      </div>
+
+      <div class="score-block">
+        <div class="score-top">
+          <span class="score-label">Score de qualification</span>
+          <span class="score-val"><span id="scoreNum">0</span><small>/100</small></span>
+        </div>
+        <div class="score-bar"><div class="score-fill" id="scoreFill"></div></div>
+        <span class="lead-badge froid" id="leadBadge">⚪ Prospect non qualifié</span>
+      </div>
+
+      <div class="crm-fields">
+        <div class="crm-field" id="f-pole"><div class="fl">✦ Pôle d'intérêt</div><div class="fv empty">Non renseigné</div></div>
+        <div class="crm-field" id="f-besoin"><div class="fl">🎯 Besoin précis</div><div class="fv empty">Non renseigné</div></div>
+        <div class="crm-field" id="f-budget"><div class="fl">💰 Budget</div><div class="fv empty">Non renseigné</div></div>
+        <div class="crm-field" id="f-delai"><div class="fl">📅 Délai souhaité</div><div class="fv empty">Non renseigné</div></div>
+        <div class="crm-field" id="f-engagement"><div class="fl">📈 Engagement</div><div class="fv empty">Non renseigné</div></div>
+      </div>
+
+      <p class="crm-note">Fiche alimentée automatiquement par l'IA. À partir d'un score de <strong style="color:var(--gold)">60/100</strong>, votre profil est transmis à un conseiller humain.</p>
+    </aside>
+  </div>
+
+  <button class="admin-float" style="bottom:16px" onclick="switchView('admin-login')">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    Espace Administrateur
+  </button>
+</div>
+
+<!-- Modal Dashboard analytique -->
+<div class="modal-bg" id="dashModal" onclick="if(event.target===this)closeDashboard()">
+  <div class="modal" role="dialog" aria-label="Tableau de bord">
+    <div class="modal-head">
+      <h2>📊 Tableau de bord — OCI Bot</h2>
+      <button class="modal-close" onclick="closeDashboard()" aria-label="Fermer">✕</button>
+    </div>
+    <p class="modal-sub" id="dashPeriod">Session en cours</p>
+    <div class="stats-grid">
+      <div class="stat"><div class="sv" id="st-conv">1</div><div class="sl">Conversations</div></div>
+      <div class="stat"><div class="sv" id="st-msg">0</div><div class="sl">Messages échangés</div></div>
+      <div class="stat"><div class="sv" id="st-resol">—</div><div class="sl">Résolution autonome</div></div>
+      <div class="stat"><div class="sv" id="st-score">0</div><div class="sl">Score de qualification</div></div>
+      <div class="stat"><div class="sv" id="st-leads">0</div><div class="sl">Leads chauds (≥60)</div></div>
+      <div class="stat"><div class="sv" id="st-time">—</div><div class="sl">Temps moyen de réponse</div></div>
+    </div>
+    <p class="modal-foot">Indicateurs calculés en temps réel sur la session courante.<br>Toutes les fiches prospects sont consultables dans l'Espace Administrateur.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════ VUE 3 : CONNEXION ADMIN ══════════════════════════ -->
+<div class="view" id="view-admin-login">
+  <div class="bg-texture"></div>
+  <div class="admin-login-card">
+    <div class="ai"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D9BC5A" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+    <h2>Espace Administrateur</h2>
+    <p class="sub">Accédez aux fiches prospects collectées par OCI Bot.</p>
+    <div id="adminAlert" class="auth-alert"></div>
+    <form id="adminLoginForm" novalidate>
+      <div class="field"><label>Identifiant</label><input type="text" id="in-admin-user" placeholder="admin" autocomplete="username"></div>
+      <div class="field"><label>Mot de passe</label><input type="password" id="in-admin-pass" placeholder="••••••••" autocomplete="current-password"></div>
+      <button type="submit" class="btn-gold">Se connecter
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </button>
+    </form>
+    <a class="back-link" onclick="backFromAdminLogin()">← Retour au chatbot</a>
+  </div>
+</div>
+
+<!-- ══════════════════════════ VUE 4 : DASHBOARD ADMIN ══════════════════════════ -->
+<div class="view" id="view-admin">
+  <div class="admin-top">
+    <div class="logo-wrap" style="width:38px;height:38px"><svg class="compass" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#071A3D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
+    <div class="header-text"><h1>Espace Administrateur</h1><p>Fiches prospects OCI Bot</p></div>
+    <div class="header-right">
+      <button class="btn-ghost" onclick="switchView('chat')">💬 Retour au chatbot</button>
+      <button class="btn-ghost" onclick="adminLogout()">↪ Déconnexion</button>
+    </div>
+  </div>
+
+  <div class="admin-body">
+    <div class="admin-kpis">
+      <div class="kpi"><div class="kv" id="kpi-total">0</div><div class="kl">Prospects enregistrés</div></div>
+      <div class="kpi"><div class="kv" id="kpi-hot">0</div><div class="kl">Leads chauds (≥60) transmis</div></div>
+      <div class="kpi"><div class="kv" id="kpi-avg">0</div><div class="kl">Score moyen</div></div>
+      <div class="kpi"><div class="kv" id="kpi-today">0</div><div class="kl">Nouveaux aujourd'hui</div></div>
+    </div>
+
+    <div class="admin-toolbar">
+      <input type="text" id="adminSearch" placeholder="🔎 Rechercher un nom, un email…" oninput="renderAdminTable()">
+      <select id="adminFilterPole" onchange="renderAdminTable()">
+        <option value="">Tous les pôles</option>
+        <option value="etudes">Études</option>
+        <option value="voyages">Voyage</option>
+        <option value="sante">Santé</option>
+        <option value="conseil">Conseil &amp; RH</option>
+      </select>
+      <select id="adminFilterScore" onchange="renderAdminTable()">
+        <option value="">Tous les scores</option>
+        <option value="chaud">🟢 Chaud (≥60)</option>
+        <option value="tiede">🟠 Tiède (30-59)</option>
+        <option value="froid">⚪ Froid (&lt;30)</option>
+      </select>
+      <button class="btn-outline" onclick="exportCSV()">⬇ Exporter CSV</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Prospect</th><th>Contact</th><th>Niveau</th><th>Pôle</th><th>Score</th><th>Email conseiller</th><th>Date</th><th></th></tr>
+        </thead>
+        <tbody id="adminTableBody"></tbody>
+      </table>
+      <div class="empty-state" id="adminEmpty" style="display:none">
+        <div class="es-ico">🗂️</div>
+        <p>Aucun prospect pour le moment.<br>Les fiches apparaîtront ici dès qu'un visiteur créera son compte sur OCI Bot.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Transcript -->
+<div class="modal-bg" id="transcriptModal" onclick="if(event.target===this)closeTranscript()">
+  <div class="modal transcript-modal" role="dialog" aria-label="Conversation">
+    <div class="modal-head">
+      <h2 id="transcriptTitle">Conversation</h2>
+      <button class="modal-close" onclick="closeTranscript()">✕</button>
+    </div>
+    <p class="modal-sub" id="transcriptSub"></p>
+    <div id="transcriptBody"></div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════════
+   OCI BOT — Assistant virtuel d'Orientis Conseil International
+   Fichier unique (HTML+CSS+JS) — sans dépendance externe hormis les
+   polices Google Fonts.
+   ────────────────────────────────────────────────────────────────────
+   ⚠️ SÉCURITÉ ET LIMITES IMPORTANTES (à lire avant mise en production)
+
+   1) APPEL IA (Claude) : ce fichier appelle directement l'API Anthropic
+      depuis le navigateur, sans clé. Cela ne fonctionne QUE dans
+      l'environnement de prévisualisation Claude (artifact). Pour héberger
+      ce chatbot sur le site réel d'Orientis Conseil International, il faut
+      faire transiter cet appel par un petit serveur (proxy backend) qui
+      conserve la clé API côté serveur — ne JAMAIS exposer de clé API
+      dans du code livré au navigateur.
+
+   2) STOCKAGE DES PROSPECTS : par souci de simplicité (aucun backend
+      fourni), les fiches prospects sont stockées dans le localStorage du
+      NAVIGATEUR de chaque visiteur. Cela signifie que l'Espace
+      Administrateur d'un appareil ne verra QUE les prospects qui ont
+      utilisé CE MÊME navigateur/appareil — les données ne sont pas
+      centralisées ni partagées entre visiteurs. Pour un vrai CRM
+      accessible depuis n'importe où (ce qui est indispensable en
+      production), il faut une vraie base de données côté serveur
+      (Firebase, Supabase, MySQL + API, etc.).
+
+   3) ENVOI D'EMAIL AUTOMATIQUE : l'envoi automatique de la fiche
+      prospect à assistancemee1@gmail.com dès qu'un score ≥ 60 est
+      atteint utilise EmailJS (https://www.emailjs.com), une solution
+      gratuite qui permet d'envoyer des emails depuis le navigateur SANS
+      backend. Pour l'activer réellement, il faut :
+        a. Créer un compte gratuit sur emailjs.com
+        b. Connecter un service d'envoi (ex. Gmail) 
+        c. Créer un template avec les variables utilisées ci-dessous
+           (to_email, subject, prospect_id, nom_complet, email,
+           telephone, niveau, pole, besoin, budget, delai, score, date)
+        d. Remplacer les 3 constantes EMAILJS_* ci-dessous par vos
+           identifiants réels (Service ID, Template ID, Public Key)
+      Tant que ces constantes ne sont pas renseignées, l'email n'est pas
+      réellement envoyé : la fiche reste toutefois enregistrée dans
+      l'Espace Administrateur avec le statut "en attente".
+
+   4) MOT DE PASSE ADMIN : le couple identifiant/mot de passe ci-dessous
+      est stocké en clair dans ce fichier, donc visible par quiconque
+      inspecte le code source. Cela suffit pour une démonstration mais
+      ne constitue PAS une sécurité réelle. En production, l'accès admin
+      doit être protégé par une authentification côté serveur.
+   ════════════════════════════════════════════════════════════════════ */
+
+// ── Configuration à personnaliser ──
+const ADMIN_USERNAME = 'admin';
+const ADMIN_PASSWORD = 'OCI-Admin-2026';               // ⚠️ À CHANGER avant toute mise en ligne
+const TARGET_EMAIL    = 'assistancemee1@gmail.com';
+const EMAIL_SUBJECT   = 'prospect OCI bot';
+const EMAILJS_SERVICE_ID  = 'VOTRE_SERVICE_ID';        // ⚠️ à remplacer (voir notes ci-dessus)
+const EMAILJS_TEMPLATE_ID = 'VOTRE_TEMPLATE_ID';       // ⚠️ à remplacer
+const EMAILJS_PUBLIC_KEY  = 'VOTRE_PUBLIC_KEY';        // ⚠️ à remplacer
+const HOT_LEAD_THRESHOLD  = 60;
+
+// ── PROMPT SYSTÈME : connaissance métier + protocole de qualification ──
+const SYSTEM_PROMPT_BASE = `Tu es OCI Bot, l'assistant virtuel officiel d'Orientis Conseil International (OCI), un groupe ivoirien basé à Angré 8ème Tranche, Abidjan, Côte d'Ivoire, dirigé par Monsieur Yao Kouakou Jean Louis Xavier. OCI est une plateforme internationale d'accompagnement global organisée autour de 4 pôles stratégiques, reliés par Orientis Accompagnement : un suivi personnalisé avant, pendant et après chaque projet, avec un interlocuteur dédié.
+
+═══ TON RÔLE ═══
+1. Présenter Orientis Conseil International et répondre à toute question sur ses 4 pôles.
+2. Identifier le pôle qui intéresse le prospect et qualifier son projet selon 5 CRITÈRES : pôle d'intérêt, besoin précis, budget, délai souhaité, niveau d'engagement.
+3. Calculer un score de qualification de 0 à 100 et orienter le prospect en conséquence.
+4. Transférer vers un conseiller humain les leads qualifiés (score ≥ 60) ou les demandes complexes.
+
+═══ STYLE ═══
+- TOUJOURS en FRANÇAIS, vouvoiement chaleureux et professionnel.
+- Messages COURTS (3-6 phrases max sauf si une liste est nécessaire). Emojis avec modération (1-3 par message).
+- Le prénom, le nom, l'email, le téléphone et le niveau d'étude du prospect sont déjà connus (voir profil ci-dessous) : ne les redemande JAMAIS, utilise le prénom pour personnaliser.
+- Si le pôle d'intérêt n'est pas encore clair, demande-le naturellement dès le début de l'échange (Études / Voyage / Santé / Conseil & RH).
+- Quand tu qualifies, numérote la question (1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣) et pose UNE SEULE question à la fois, de façon conversationnelle et non intrusive.
+- Ne garantis JAMAIS une admission, un visa, un résultat médical ou un tarif exact. Donne des montants indicatifs avec la mention qu'ils peuvent varier, et propose systématiquement un devis personnalisé gratuit.
+- Valorise chaque réponse du prospect avant de poser la question suivante ("Parfait !", "Excellent choix !"...).
+- Pour toute question médicale précise (diagnostic, traitement), ne réponds jamais toi-même : oriente vers l'étude de dossier confidentielle par l'équipe Orientis Santé.
+
+═══ ORIENTIS CONSEIL INTERNATIONAL — VUE D'ENSEMBLE ═══
+Siège : Angré 8ème Tranche, Abidjan, Côte d'Ivoire. Contact : +225 01 53 22 22 93 / +225 07 14 44 44 49 (WhatsApp) / infos@orientisconseil.com. Réponse humaine sous 48h. Consultation initiale gratuite et sans engagement. Toi, tu es disponible 24h/24, 7j/7.
+
+═══ PÔLE 1 — ORIENTIS ÉTUDES ═══
+Accompagnement des projets d'études en Côte d'Ivoire et à l'international. Services : orientation académique, admission écoles, assistance candidatures, coaching administratif, préparation tests de langue, visa étudiant, logement & intégration, suivi pédagogique.
+Destinations :
+🇫🇷 FRANCE — 400 000+ étudiants étrangers/an, 4e destination mondiale. Frais : universités publiques 170-380€/an, grandes écoles 5 000-16 000€/an. Coût de vie 700-1 200€/mois. Logement CROUS 200-400€/mois ou privé 400-800€/mois. Langue française. Visa VLS-TS via Campus France, traitement 3-8 semaines. Bourses : Évariste Galois, BGF, Erasmus+.
+🇲🇦 MAROC — 50 000+ étudiants étrangers/an. Frais : public gratuit pour boursiers, privé 2 000-8 000€/an. Coût de vie 300-600€/mois. Logement cité U 30-80€/mois, appartement partagé 150-300€/mois. Français et arabe. Visa 2-6 semaines.
+🇹🇳 TUNISIE — 220 000+ étudiants/an, référence en médecine/ingénierie/biotechnologie. Frais public 200-700€/an, privé 1 500-5 000€/an. Coût de vie 250-500€/mois (parmi les plus bas de la région). Logement 30-60€/mois (résidence) ou 100-250€/mois (privé). Visa 2-4 semaines. Diplômes reconnus par accords avec la France, la Belgique et le Canada.
+🇸🇳 SÉNÉGAL — pôle universitaire majeur d'Afrique francophone, hub UEMOA/CEDEAO (réseau de 15 pays). Frais public 200-600€/an, privé 1 500-5 000€/an. Coût de vie 250-500€/mois (Dakar plus cher). Logement 30-80€/mois ou 100-250€/mois. Visa 2-5 semaines, exemptions possibles pour les ressortissants CEDEAO.
+🇬🇧 ANGLETERRE — 4 des 10 meilleures universités mondiales (Oxford, Cambridge, Imperial, UCL selon le QS World University Ranking). Cursus courts : Bachelor 3 ans, Master 1 an. Frais 10 000-38 000£/an. Coût de vie 900-1 500£/mois. Logement résidence 500-900£/mois ou colocation 400-700£/mois. IELTS 6.0 à 7.0 requis. Student Visa (CAS obligatoire), traitement 3-8 semaines. Graduate Route Visa post-études (2 à 3 ans).
+🇬🇭 GHANA — destination anglophone stable, Université du Ghana (Legon) et KNUST parmi les meilleures d'Afrique. Frais public 1 500-3 500$/an, privé 3 000-8 000$/an. Coût de vie 300-600$/mois. Logement 80-200$/mois ou 150-400$/mois. Anglais niveau B2 généralement requis. Visa 2-6 semaines. Secteur pétrolier et énergétique en croissance.
+
+═══ PÔLE 2 — ORIENTIS VOYAGE ═══
+Agence de voyages sur mesure. Types de voyages :
+- Tourisme & Loisirs : circuits personnalisés ou clé en main, hôtels selon budget, guide francophone.
+- Voyage d'Affaires : hôtels business, salles de réunion, transferts privés, visas d'affaires, facturation entreprise.
+- Pèlerinage chrétien : Lourdes (7 jours, sanctuaire Notre-Dame, procession mariale) ; Rome & Vatican (8 jours, audience papale selon calendrier, basiliques majeures) ; également Terre Sainte et Fatima. Vol, visa Schengen, hôtel proche du sanctuaire et accompagnateur spirituel francophone inclus.
+- Voyage en Famille : hôtels familiaux, activités tous âges, formalités mineurs, assurance famille.
+- Voyages Scolaires & Linguistiques : immersions linguistiques en France, en Angleterre et ailleurs, visites de campus, familles d'accueil, encadrement pédagogique renforcé.
+- Tourisme Médical : passerelle directe vers le pôle Orientis Santé.
+Destinations phares : France, Maroc, Tunisie, Sénégal, Angleterre, Ghana.
+Tarifs : toujours sur devis personnalisé selon dates, destination et formule — il n'existe pas de prix fixes publiés. Propose systématiquement une demande de devis gratuite.
+Processus en 4 étapes : 1) Demande (formulaire ou contact direct) → 2) Proposition personnalisée → 3) Validation & réservation → 4) Accompagnement avant, pendant et après le séjour.
+
+═══ PÔLE 3 — ORIENTIS SANTÉ ═══
+Tourisme médical : orientation vers des cliniques accréditées à l'étranger. Atouts : délais réduits (quelques semaines au lieu de longues listes d'attente), tarifs 40 à 70% moins chers qu'en Europe, chirurgiens souvent formés en Europe, destinations francophones, accompagnement complet (vol, hébergement, transferts, traduction), confidentialité garantie.
+Spécialités et destinations associées :
+- Soins dentaires (implants, couronnes, orthodontie) → Tunisie, Maroc, Turquie, Sénégal
+- Chirurgie esthétique (rhinoplastie, liposuccion…) → Tunisie, Maroc, Turquie
+- Greffe de cheveux (technique FUE) → Turquie, Tunisie
+- Chirurgie bariatrique (sleeve, bypass) → Tunisie, Turquie
+- Ophtalmologie (cataracte, correction laser) → Maroc, Inde, Sénégal
+- Orthopédie (prothèses hanche/genou, rachis) → Turquie, Inde
+- Cardiologie (bilans, chirurgie, stents) → Inde, Turquie, France, Ghana
+- Fertilité & PMA (FIV) → Tunisie, Inde
+Parcours en 5 étapes : 1) Première demande confidentielle (besoin médical, documents facultatifs) → 2) Étude du dossier (2 à 3 cliniques partenaires sélectionnées, accréditations vérifiées) → 3) Devis médical détaillé, acte par acte, expliqué en français → 4) Organisation du voyage (vol, hébergement, visa médical, transferts) → 5) Soins et accompagnement sur place (accueil à l'aéroport, interprète, suivi), puis suivi post-opératoire au retour.
+
+═══ PÔLE 4 — ORIENTIS CONSEIL & RH ═══
+Formations professionnelles, coaching et solutions RH pour particuliers et entreprises. Formats : présentiel, distanciel ou hybride.
+Domaines de formation : Management & Leadership (gestion d'équipe, méthodes agiles, communication managériale) ; Soft Skills (communication, gestion du stress, prise de parole, intelligence émotionnelle) ; Finance & Gestion (comptabilité, budget, fiscalité) ; Digital & Numérique (marketing digital, bureautique, cybersécurité, bases de la programmation) ; Entrepreneuriat (business plan, financement, vente) ; Certifications professionnelles reconnues (PMP, PRINCE2, Scrum…).
+Coaching individuel : Coaching de carrière (bilan de compétences, objectifs SMART, personal branding, 6 à 12 séances) ; Coaching de dirigeant (posture de leader, prise de décision — pour DG, DGA et managers confirmés) et d'autres formules sur mesure.
+Offres entreprises : Formation intra-entreprise (sur site, contenu sur mesure) ; Formation inter-entreprises (groupes mixtes) ; Plan de formation annuel (audit des besoins) ; Programme de leadership (cadres à haut potentiel) ; Accompagnement au changement (restructurations, fusions, transformation digitale) ; Conseil RH & GPEC (cartographie des métiers, gestion des talents, recrutement, insertion professionnelle).
+Tarifs sur devis selon la formule et le volume — propose une demande de devis gratuite.
+
+═══ RÈGLES DE SCORING (0-100) ═══
+5 critères, jusqu'à 20 points chacun selon la clarté et la faisabilité :
+- Pôle d'intérêt identifié clairement : 15-20 pts ; hésitant entre plusieurs pôles : 5-10 pts.
+- Besoin précis dans ce pôle (ex. destination + niveau visé, type de voyage + dates, spécialité médicale, thème de formation) : 15-20 pts ; besoin vague : 5-10 pts.
+- Budget évoqué et cohérent avec le besoin : 15-20 pts ; budget flou ou insuffisant : 5-10 pts.
+- Délai/échéance réaliste : 15-20 pts ; délai flou ou irréaliste : 5-10 pts.
+- Engagement démontré (questions précises, intention claire d'avancer) : 15-20 pts ; simple curiosité passive : 5-10 pts.
+Le score ne reflète QUE les critères réellement exprimés par le prospect. Score initial : 0.
+
+═══ ORIENTATION SELON LE SCORE ═══
+- Score ≥ 60 (LEAD CHAUD 🟢) : félicite le prospect, indique que son profil correspond parfaitement et qu'un conseiller spécialiste du pôle concerné va le contacter très rapidement. Action = "transfert".
+- Score 30-59 (LEAD TIÈDE 🟠) : donne du contenu utile et ciblé, invite à demander un devis gratuit ou un rendez-vous découverte. Action = "rdv".
+- Score < 30 (LEAD FROID ⚪) : informe et aide à préciser le projet. Action = "info".
+- Demande explicite d'un conseiller humain OU situation complexe (dossier médical sensible, refus de visa antérieur, litige) : Action = "transfert" quel que soit le score.
+- Le prospect dit être prêt à se lancer ("je suis prêt", "je veux m'inscrire", "comment commencer", "go") : Action = "form".
+
+═══ PROTOCOLE DE SORTIE OBLIGATOIRE ═══
+Termine CHAQUE réponse, sans exception, par une ligne séparée contenant EXACTEMENT ce bloc (et rien après) :
+[OCI_DATA]{"pole":"etudes|voyages|sante|conseil|null","besoin":"...ou null","budget":"...ou null","delai":"...ou null","engagement":"faible|moyen|fort|null","score":0,"statut":"froid|tiede|chaud","action":"info|rdv|transfert|form","resolu":true,"suggestions":["...","...","..."]}[/OCI_DATA]
+Règles du bloc :
+- JSON STRICT valide, sur une seule ligne, valeurs en français, null (sans guillemets) pour les critères non encore collectés.
+- "pole" : identifiant technique en minuscules parmi etudes / voyages / sante / conseil / null.
+- "score" : entier 0-100 selon les règles de scoring. "statut" : froid (<30), tiede (30-59), chaud (≥60).
+- "resolu" : true si tu as entièrement traité la demande sans besoin d'un humain, false sinon.
+- "suggestions" : 2 ou 3 questions de suivi courtes (max 6 mots) que le prospect pourrait cliquer. Tableau vide si action = "transfert" ou "form".
+- Ce bloc est INVISIBLE pour le prospect : n'y fais jamais référence dans ta réponse.`;
+
+function buildSystemPrompt(user){
+  return SYSTEM_PROMPT_BASE + `
+
+═══ PROFIL CONNU DU PROSPECT (déjà fourni à l'inscription — ne repose jamais ces questions) ═══
+Prénom : ` + user.prenom + `
+Nom : ` + user.nom + `
+Email : ` + user.email + `
+Téléphone : ` + user.telephone + `
+Niveau d'étude / profil : ` + user.niveau + `
+Utilise le prénom pour personnaliser tes messages (ex. "Bonjour ` + user.prenom + ` !").`;
+}
+
+/* ════════════════════════ STOCKAGE (localStorage) ════════════════════════ */
+function loadProspects(){ try{ return JSON.parse(localStorage.getItem('oci_prospects')||'[]'); }catch(e){ return []; } }
+function saveProspects(arr){ localStorage.setItem('oci_prospects', JSON.stringify(arr)); }
+function upsertProspect(rec){
+  const arr = loadProspects();
+  const i = arr.findIndex(p=>p.id===rec.id);
+  if(i>-1) arr[i] = Object.assign({}, arr[i], rec);
+  else arr.unshift(rec);
+  saveProspects(arr);
+}
+function getProspectById(id){ return loadProspects().find(p=>p.id===id); }
+function getCurrentUser(){ try{ return JSON.parse(localStorage.getItem('oci_current_user')||'null'); }catch(e){ return null; } }
+function setCurrentUser(u){ localStorage.setItem('oci_current_user', JSON.stringify(u)); }
+function uid(prefix){ return prefix + '-' + new Date().getFullYear() + '-' + String(Math.floor(1000 + Math.random()*9000)); }
+
+/* ════════════════════════ VUES ════════════════════════ */
+function switchView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+}
+
+/* ════════════════════════ VUE AUTH ════════════════════════ */
+function switchAuthTab(tab){
+  document.getElementById('tabCreate').classList.toggle('active', tab==='create');
+  document.getElementById('tabLogin').classList.toggle('active', tab==='login');
+  document.getElementById('paneCreate').classList.toggle('active', tab==='create');
+  document.getElementById('paneLogin').classList.toggle('active', tab==='login');
+  hideAuthAlert();
+}
+function showAuthAlert(msg, type){
+  const el = document.getElementById('authAlert');
+  el.textContent = msg; el.className = 'auth-alert show ' + type;
+}
+function hideAuthAlert(){ document.getElementById('authAlert').className = 'auth-alert'; }
+
+function markInvalid(fieldId, invalid){
+  const el = document.getElementById(fieldId);
+  if(!el) return;
+  el.classList.toggle('invalid', invalid);
+}
+
+function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()); }
+function validPhone(v){ return v.replace(/[^0-9]/g,'').length >= 8; }
+
+document.getElementById('createForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const prenom = document.getElementById('in-prenom').value.trim();
+  const nom = document.getElementById('in-nom').value.trim();
+  const email = document.getElementById('in-email').value.trim();
+  const tel = document.getElementById('in-tel').value.trim();
+  const niveau = document.getElementById('in-niveau').value;
+
+  let ok = true;
+  markInvalid('f-prenom', !prenom); if(!prenom) ok=false;
+  markInvalid('f-nom', !nom); if(!nom) ok=false;
+  markInvalid('f-email', !validEmail(email)); if(!validEmail(email)) ok=false;
+  markInvalid('f-tel', !validPhone(tel)); if(!validPhone(tel)) ok=false;
+  markInvalid('f-niveau', !niveau); if(!niveau) ok=false;
+  if(!ok){ showAuthAlert('Merci de compléter correctement tous les champs obligatoires.', 'error'); return; }
+  hideAuthAlert();
+
+  // email déjà utilisé ? on relie alors le compte existant plutôt que d'en recréer un
+  const existing = loadProspects().find(p => p.email.toLowerCase() === email.toLowerCase());
+  const user = existing ? {
+    id: existing.id, prenom: existing.prenom, nom: existing.nom, email: existing.email,
+    telephone: existing.telephone, niveau: existing.niveau, createdAt: existing.createdAt
+  } : {
+    id: uid('OCI'), prenom, nom, email, telephone: tel, niveau, createdAt: new Date().toISOString()
+  };
+
+  setCurrentUser(user);
+  if(!existing){
+    upsertProspect({
+      id: user.id, prenom, nom, email, telephone: tel, niveau, createdAt: user.createdAt,
+      pole: null, besoin: null, budget: null, delai: null, engagement: null,
+      score: 0, statut: 'froid', emailSent: false, transcript: [], lastUpdated: new Date().toISOString()
+    });
+  }
+  startChat(user);
+});
+
+document.getElementById('loginForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const email = document.getElementById('in-login-email').value.trim();
+  const rec = loadProspects().find(p => p.email.toLowerCase() === email.toLowerCase());
+  if(!rec){ markInvalid('f-login-email', true); return; }
+  markInvalid('f-login-email', false);
+  const user = { id: rec.id, prenom: rec.prenom, nom: rec.nom, email: rec.email, telephone: rec.telephone, niveau: rec.niveau, createdAt: rec.createdAt };
+  setCurrentUser(user);
+  startChat(user);
+});
+
+function logoutUser(){
+  localStorage.removeItem('oci_current_user');
+  toggleProfilePop(false);
+  document.getElementById('createForm').reset();
+  document.getElementById('loginForm').reset();
+  switchAuthTab('login');
+  switchView('auth');
+}
+
+/* ════════════════════════ ADMIN AUTH ════════════════════════ */
+document.getElementById('adminLoginForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const u = document.getElementById('in-admin-user').value.trim();
+  const p = document.getElementById('in-admin-pass').value;
+  const alertEl = document.getElementById('adminAlert');
+  if(u === ADMIN_USERNAME && p === ADMIN_PASSWORD){
+    alertEl.className = 'auth-alert';
+    sessionStorage.setItem('oci_admin_session', '1');
+    document.getElementById('adminLoginForm').reset();
+    renderAdminDashboard();
+    switchView('admin');
+  } else {
+    alertEl.textContent = 'Identifiant ou mot de passe incorrect.';
+    alertEl.className = 'auth-alert show error';
+  }
+});
+function backFromAdminLogin(){
+  const u = getCurrentUser();
+  switchView(u ? 'chat' : 'auth');
+}
+function adminLogout(){
+  sessionStorage.removeItem('oci_admin_session');
+  const u = getCurrentUser();
+  switchView(u ? 'chat' : 'auth');
+}
+
+/* ════════════════════════ CHAT — ÉTAT ════════════════════════ */
+let history = [];
+let isTyping = false;
+let currentUser = null;
+let crmState = { pole:null, besoin:null, budget:null, delai:null, engagement:null, score:0, statut:'froid' };
+let hotLeadSent = false;
+let stats = { conversations:1, messages:0, botReplies:0, resolved:0, leads:0, leadCounted:false, times:[] };
+
+const QUICK_QUESTIONS = {
+  all: [
+    ['✦','Présentez-moi Orientis Conseil International'],
+    ['🎓','Parlez-moi du pôle Études'],
+    ['✈️','Parlez-moi du pôle Voyage'],
+    ['🏥','Parlez-moi du pôle Santé'],
+    ['💼','Parlez-moi du pôle Conseil & RH'],
+    ['📍','Où êtes-vous situés ?']
+  ],
+  etudes: [
+    ['🌍','Quelles destinations proposez-vous ?'],
+    ['💰','Coûts des études à l’étranger'],
+    ['🇫🇷','Étudier en France'],
+    ['🇲🇦','Étudier au Maroc'],
+    ['🇹🇳','Étudier en Tunisie'],
+    ['🇬🇧','Étudier en Angleterre'],
+    ['📄','Documents nécessaires pour mon dossier'],
+    ['🔍','Aidez-moi à choisir ma destination']
+  ],
+  voyages: [
+    ['🧳','Quels types de voyages organisez-vous ?'],
+    ['⛪','Programmes de pèlerinage'],
+    ['💼','Voyage d’affaires'],
+    ['👨‍👩‍👧','Voyage en famille'],
+    ['🎒','Voyages scolaires et linguistiques'],
+    ['💰','Comment obtenir un devis ?']
+  ],
+  sante: [
+    ['🦷','Soins dentaires à l’étranger'],
+    ['💉','Chirurgie esthétique'],
+    ['💇','Greffe de cheveux'],
+    ['❤️','Cardiologie'],
+    ['🤰','Fertilité et PMA'],
+    ['🗓️','Comment se déroule le parcours de soins ?']
+  ],
+  conseil: [
+    ['📚','Vos domaines de formation'],
+    ['🎯','Coaching de carrière'],
+    ['🏢','Solutions pour les entreprises'],
+    ['👥','Conseil RH et gestion des talents'],
+    ['🖥️','Formations en digital & numérique']
+  ]
+};
+
+function startChat(user){
+  currentUser = user;
+  history = [];
+  hotLeadSent = false;
+  const existing = getProspectById(user.id);
+  crmState = existing ? {
+    pole: existing.pole, besoin: existing.besoin, budget: existing.budget,
+    delai: existing.delai, engagement: existing.engagement,
+    score: existing.score||0, statut: existing.statut||'froid'
+  } : { pole:null, besoin:null, budget:null, delai:null, engagement:null, score:0, statut:'froid' };
+  hotLeadSent = crmState.score >= HOT_LEAD_THRESHOLD;
+  stats = { conversations:1, messages:0, botReplies:0, resolved:0, leads: hotLeadSent?1:0, leadCounted: hotLeadSent, times:[] };
+
+  document.getElementById('crmId').textContent = user.id;
+  document.getElementById('ab-name').textContent = user.prenom + ' ' + user.nom;
+  document.getElementById('ab-email').textContent = user.email;
+  document.getElementById('ab-tel').textContent = user.telephone;
+  document.getElementById('ab-niveau').textContent = user.niveau;
+  document.getElementById('pp-name').textContent = user.prenom + ' ' + user.nom;
+  document.getElementById('pp-email').textContent = user.email;
+  document.getElementById('pp-tel').textContent = user.telephone;
+  document.getElementById('pp-niveau').textContent = user.niveau;
+  document.getElementById('profileBtnName').textContent = user.prenom;
+
+  updateCRM(crmState);
+  updateStats();
+  selectPoleTab('all');
+  initChat();
+  switchView('chat');
+}
+
+function greetingMessage(){
+  const h = new Date().getHours();
+  let salut = h < 12 ? 'Bonjour' : (h < 18 ? 'Bon après-midi' : 'Bonsoir');
+  let base = salut + ' ' + currentUser.prenom + ' ! Je suis **OCI Bot**, l’assistant virtuel d’Orientis Conseil International 🧭\nJe suis disponible **24h/24** pour répondre à vos questions sur nos 4 pôles : Études, Voyage, Santé et Conseil & RH.';
+  if(h >= 18 || h < 8){ base += '\n\n🌙 Notre équipe humaine est actuellement hors ligne, mais je reste disponible pour vous répondre immédiatement.'; }
+  base += '\n\nQuel pôle vous intéresse aujourd’hui ?';
+  return base;
+}
+
+function initChat(){
+  const msgs = document.getElementById('messages');
+  msgs.innerHTML = '';
+  const wc = document.createElement('div');
+  wc.className = 'welcome-card'; wc.id = 'welcome';
+  wc.innerHTML = '<svg class="compass wc-decor compass-spin" width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#D9BC5A" stroke-width="1"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>' +
+    '<div class="wc-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#071A3D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>' +
+    '<h2>Orientis Conseil International</h2><p>4 univers, 1 vision : des opportunités sans frontières. Posez vos questions librement — études, voyages, santé, carrière — je comprends le langage naturel.</p>' +
+    '<div class="tag-list"><span class="tag">🎓 Études</span><span class="tag">✈️ Voyage</span><span class="tag">🏥 Santé</span><span class="tag">💼 Conseil &amp; RH</span></div>';
+  msgs.appendChild(wc);
+  appendMessage('bot', greetingMessage(), ['🎓 Études','✈️ Voyage','🏥 Santé','💼 Conseil & RH'], true);
+}
+
+function resetChat(){
+  history = [];
+  hotLeadSent = false;
+  crmState = { pole:null, besoin:null, budget:null, delai:null, engagement:null, score:0, statut:'froid' };
+  stats.conversations++; stats.leadCounted=false;
+  upsertProspect({ id: currentUser.id, pole:null, besoin:null, budget:null, delai:null, engagement:null, score:0, statut:'froid', transcript:[], lastUpdated:new Date().toISOString() });
+  updateCRM(crmState); updateStats();
+  initChat();
+}
+
+/* ── Sidebar : sélection de pôle & questions rapides ── */
+function selectPoleTab(pole){
+  document.querySelectorAll('.pole-tab').forEach(b=>b.classList.toggle('active', b.dataset.pole===pole));
+  const titles = { all:'Questions rapides', etudes:'Pôle Études', voyages:'Pôle Voyage', sante:'Pôle Santé', conseil:'Pôle Conseil & RH' };
+  document.getElementById('quickTitle').textContent = titles[pole];
+  const list = document.getElementById('quickList');
+  list.innerHTML = '';
+  (QUICK_QUESTIONS[pole]||[]).forEach(function(q){
+    const btn = document.createElement('button');
+    btn.className = 'quick-btn';
+    btn.innerHTML = '<span class="qico">'+q[0]+'</span>'+q[1];
+    btn.onclick = function(){ sendQuick(q[1]); };
+    list.appendChild(btn);
+  });
+}
+
+/* ── Profil dropdown ── */
+function toggleProfilePop(force){
+  const pop = document.getElementById('profilePop');
+  if(typeof force === 'boolean'){ pop.classList.toggle('open', force); return; }
+  pop.classList.toggle('open');
+}
+document.addEventListener('click', function(e){
+  const pop = document.getElementById('profilePop');
+  const btn = document.getElementById('profileBtn');
+  if(pop && !pop.contains(e.target) && e.target!==btn && !btn.contains(e.target)) pop.classList.remove('open');
+});
+
+/* ── Outils UI ── */
+function autoResize(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,120)+'px'; }
+function handleKey(e){ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); } }
+function scrollToBottom(){ const m=document.getElementById('messages'); m.scrollTop=m.scrollHeight; }
+function sendQuick(text){ document.getElementById('input').value=text; sendMessage(); }
+
+function formatText(text){
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*([^*\n]+?)\*/g,'<em>$1</em>')
+    .replace(/^#{1,3} (.+)$/gm,'<h4>$1</h4>')
+    .replace(/^[-•] (.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>[\s\S]*?<\/li>)/g, m => '<ul>'+m+'</ul>')
+    .replace(/<\/ul>\s*<ul>/g,'')
+    .replace(/\n\n/g,'<br><br>')
+    .replace(/\n/g,'<br>');
+}
+
+function initials(user){ return (user.prenom[0]||'').toUpperCase() + (user.nom[0]||'').toUpperCase(); }
+
+function appendMessage(role, content, chips, skipHide){
+  chips = chips || [];
+  if(!skipHide){ const wc=document.getElementById('welcome'); if(wc) wc.style.display='none'; }
+  const msgs=document.getElementById('messages');
+  const wrap=document.createElement('div'); wrap.className='msg '+role;
+  const avatar=document.createElement('div'); avatar.className='avatar '+role;
+  avatar.textContent = role==='bot' ? '🧭' : initials(currentUser);
+  const bubble=document.createElement('div'); bubble.className='bubble';
+  if(role==='bot'){
+    bubble.innerHTML=formatText(content);
+    if(chips && chips.length){
+      const cw=document.createElement('div'); cw.className='chips';
+      chips.forEach(function(c){
+        const btn=document.createElement('button'); btn.className='chip'; btn.textContent=c;
+        btn.onclick=function(){ sendQuick(c.replace(/^[^\wÀ-ÿ]+/,'').trim()||c); };
+        cw.appendChild(btn);
+      });
+      bubble.appendChild(cw);
+    }
+  } else { bubble.textContent=content; }
+  wrap.appendChild(avatar); wrap.appendChild(bubble);
+  msgs.appendChild(wrap); scrollToBottom();
+}
+
+function showTyping(){
+  const msgs=document.getElementById('messages');
+  const wrap=document.createElement('div'); wrap.className='msg bot'; wrap.id='typing-msg';
+  wrap.innerHTML='<div class="avatar bot">🧭</div><div class="bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
+  msgs.appendChild(wrap); scrollToBottom();
+}
+function hideTyping(){ const t=document.getElementById('typing-msg'); if(t) t.remove(); }
+
+/* ── Fiche prospect / CRM ── */
+function setField(id, value){
+  const el=document.getElementById(id); if(!el) return;
+  const fv=el.querySelector('.fv');
+  if(value){ fv.textContent=value; fv.classList.remove('empty'); el.classList.add('filled'); }
+  else { fv.textContent='Non renseigné'; fv.classList.add('empty'); el.classList.remove('filled'); }
+}
+const POLE_LABELS = { etudes:'🎓 Études', voyages:'✈️ Voyage', sante:'🏥 Santé', conseil:'💼 Conseil & RH' };
+
+function updateCRM(d){
+  setField('f-pole', d.pole ? POLE_LABELS[d.pole]||d.pole : null);
+  setField('f-besoin', d.besoin);
+  setField('f-budget', d.budget);
+  setField('f-delai', d.delai);
+  setField('f-engagement', d.engagement ? d.engagement.charAt(0).toUpperCase()+d.engagement.slice(1) : null);
+  const score=Math.max(0,Math.min(100, parseInt(d.score)||0));
+  document.getElementById('scoreNum').textContent=score;
+  const fill=document.getElementById('scoreFill');
+  fill.style.width=score+'%';
+  const badge=document.getElementById('leadBadge');
+  if(score>=HOT_LEAD_THRESHOLD){ fill.style.background='var(--green)'; badge.className='lead-badge chaud'; badge.textContent='🟢 Lead chaud — transféré à un conseiller'; }
+  else if(score>=30){ fill.style.background='var(--orange)'; badge.className='lead-badge tiede'; badge.textContent='🟠 Lead tiède — nurturing / devis'; }
+  else if(score>0){ fill.style.background='var(--muted)'; badge.className='lead-badge froid'; badge.textContent='⚪ Lead froid — information'; }
+  else { fill.style.background='var(--muted)'; badge.className='lead-badge froid'; badge.textContent='⚪ Prospect non qualifié'; }
+}
+
+/* ── Dashboard session ── */
+function updateStats(){
+  document.getElementById('st-conv').textContent=stats.conversations;
+  document.getElementById('st-msg').textContent=stats.messages;
+  document.getElementById('st-resol').textContent = stats.botReplies ? Math.round(100*stats.resolved/stats.botReplies)+' %' : '—';
+  document.getElementById('st-score').textContent=crmState.score+'/100';
+  document.getElementById('st-leads').textContent=stats.leads;
+  document.getElementById('st-time').textContent = stats.times.length ? (stats.times.reduce(function(a,b){return a+b},0)/stats.times.length/1000).toFixed(1)+' s' : '—';
+}
+function openDashboard(){
+  const now=new Date();
+  document.getElementById('dashPeriod').textContent='Session du '+now.toLocaleDateString('fr-FR')+' · '+now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  updateStats();
+  document.getElementById('dashModal').classList.add('open');
+}
+function closeDashboard(){ document.getElementById('dashModal').classList.remove('open'); }
+
+/* ── Cartes d'orientation ── */
+function showTransferCard(){
+  if(document.getElementById('transfer-card')) return;
+  const msgs=document.getElementById('messages');
+  const wrap=document.createElement('div'); wrap.className='msg bot';
+  const card=document.createElement('div'); card.className='transfer-card'; card.id='transfer-card';
+  card.innerHTML =
+    '<div class="t-head"><div class="t-ico">📞</div><h3>Transfert vers un conseiller OCI</h3></div>' +
+    '<p>Votre profil a été transmis à notre conseiller spécialiste avec l’ensemble du contexte de cette conversation. Un membre de l’équipe vous contactera dans les <strong style="color:#3ecf8e">plus brefs délais</strong> (réponse sous 48h).</p>' +
+    '<p class="t-meta">Réf. ' + currentUser.id + ' · Score : ' + crmState.score + '/100 · Fiche transmise à l’équipe ✅</p>';
+  wrap.innerHTML='<div class="avatar bot">🧭</div>';
+  wrap.appendChild(card);
+  msgs.appendChild(wrap);
+  setTimeout(function(){ card.scrollIntoView({behavior:'smooth',block:'nearest'}); },100);
+}
+
+function showFormCard(){
+  if(document.getElementById('form-cta-card')){ document.getElementById('form-cta-card').scrollIntoView({behavior:'smooth'}); return; }
+  const msgs=document.getElementById('messages');
+  const wrap=document.createElement('div'); wrap.className='msg bot';
+  const card=document.createElement('div'); card.className='cta-card'; card.id='form-cta-card';
+  card.innerHTML =
+    '<div class="cta-top"><div class="cta-icon">🚀</div><div><h3>Vous êtes prêt — félicitations !</h3></div></div>' +
+    '<p>Un conseiller Orientis Conseil International va analyser votre profil et vous contactera au ' + currentUser.telephone + ' ou à ' + currentUser.email + ' pour démarrer votre accompagnement personnalisé.</p>' +
+    '<a class="cta-btn" href="tel:+2250153222293">' +
+      '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>' +
+      'Appeler Orientis Conseil International</a>' +
+    '<p class="cta-note">📋 Réponse sous 48h · Consultation initiale gratuite · Accompagnement personnalisé</p>';
+  wrap.innerHTML='<div class="avatar bot">🧭</div>';
+  wrap.appendChild(card);
+  msgs.appendChild(wrap);
+  setTimeout(function(){ card.scrollIntoView({behavior:'smooth',block:'nearest'}); },100);
+}
+
+/* ── Envoi automatique de la fiche au conseiller (score ≥ 60) ── */
+async function sendHotLeadEmail(record){
+  if(!EMAILJS_SERVICE_ID || EMAILJS_SERVICE_ID.indexOf('VOTRE_') === 0){
+    console.warn('[OCI Bot] EmailJS non configuré : voir les notes en tête du fichier pour activer l’envoi automatique.');
+    return false;
+  }
+  try{
+    const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({
+        service_id: EMAILJS_SERVICE_ID,
+        template_id: EMAILJS_TEMPLATE_ID,
+        user_id: EMAILJS_PUBLIC_KEY,
+        template_params: {
+          to_email: TARGET_EMAIL,
+          subject: EMAIL_SUBJECT,
+          prospect_id: record.id,
+          nom_complet: record.prenom + ' ' + record.nom,
+          email: record.email,
+          telephone: record.telephone,
+          niveau: record.niveau,
+          pole: record.pole ? (POLE_LABELS[record.pole]||record.pole) : 'Non précisé',
+          besoin: record.besoin || 'Non précisé',
+          budget: record.budget || 'Non précisé',
+          delai: record.delai || 'Non précisé',
+          score: record.score,
+          date: new Date().toLocaleString('fr-FR')
+        }
+      })
+    });
+    return res.ok;
+  }catch(e){ console.error('[OCI Bot] Échec de l’envoi automatique de la fiche prospect :', e); return false; }
+}
+
+async function handleHotLead(){
+  if(hotLeadSent) return;
+  hotLeadSent = true;
+  if(!stats.leadCounted){ stats.leads++; stats.leadCounted = true; }
+  const record = Object.assign({}, currentUser, crmState, {
+    transcript: buildTranscriptSnapshot(),
+    lastUpdated: new Date().toISOString(),
+    emailSent: false
+  });
+  upsertProspect(record);
+  const ok = await sendHotLeadEmail(record);
+  upsertProspect({ id: currentUser.id, emailSent: ok, lastUpdated: new Date().toISOString() });
+}
+
+function buildTranscriptSnapshot(){
+  return history
+    .filter(function(m){ return typeof m.content === 'string'; })
+    .map(function(m){ return { role: m.role, content: m.content.replace(/\[OCI_DATA\][\s\S]*?\[\/OCI_DATA\]/,'').trim() }; });
+}
+
+/* ── Parsing du bloc de données NLP ── */
+function extractData(reply){
+  const re=/\[OCI_DATA\]([\s\S]*?)\[\/OCI_DATA\]/;
+  const m=reply.match(re);
+  let data=null;
+  if(m){
+    try{ data=JSON.parse(m[1].trim()); }catch(e){ console.warn('Bloc OCI_DATA illisible', e); }
+    reply=reply.replace(re,'').trim();
+  }
+  reply=reply.replace('[SHOW_FORM_CTA]','').trim();
+  return { reply: reply, data: data };
+}
+
+/* ── Appel IA : proxy sécurisé en priorité, appel direct en repli ──
+   1) /api/chat : fonction serveur (Vercel) qui garde la clé API côté
+      serveur — c'est la voie normale une fois le site déployé.
+   2) Si /api/chat n'existe pas (ex. aperçu Claude, hébergement statique
+      sans backend), on retente un appel direct à l'API Anthropic —
+      cette voie ne fonctionne que dans l'environnement Claude. */
+async function callAssistant(payload){
+  try{
+    const proxyRes = await fetch('/api/chat', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if(proxyRes.status !== 404) return proxyRes;
+  }catch(e){ /* /api/chat injoignable : on tente le repli ci-dessous */ }
+
+  return fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json' },
+    body: JSON.stringify(Object.assign({ model:'claude-sonnet-4-6', max_tokens:1000 }, payload))
+  });
+}
+
+/* ── Envoi / appel IA ── */
+async function sendMessage(){
+  if(isTyping) return;
+  const input=document.getElementById('input');
+  const text=input.value.trim();
+  if(!text) return;
+  input.value=''; input.style.height='auto';
+  document.getElementById('sendBtn').disabled=true;
+  appendMessage('user', text);
+  history.push({ role:'user', content:text });
+  stats.messages++;
+  isTyping=true; showTyping();
+  const t0=Date.now();
+
+  try{
+    const response=await callAssistant({ system: buildSystemPrompt(currentUser), messages: history });
+
+    if(!response.ok){
+      const err=await response.json().catch(function(){ return {}; });
+      throw new Error((err && err.error && err.error.message) || ('HTTP '+response.status));
+    }
+
+    const apiData=await response.json();
+    hideTyping();
+    stats.times.push(Date.now()-t0);
+
+    let raw=(apiData.content||[]).map(function(b){ return b.type==='text'?b.text:''; }).filter(Boolean).join('\n').trim();
+    if(!raw){ appendMessage('bot',"Désolé, je n'ai pas pu traiter votre demande. Pouvez-vous reformuler ?"); }
+    else{
+      const parsed=extractData(raw);
+      const reply=parsed.reply, data=parsed.data;
+      history.push({ role:'assistant', content:raw });
+      stats.messages++; stats.botReplies++;
+
+      let chips=[];
+      let action='info';
+      if(data){
+        crmState={ pole:data.pole||crmState.pole, besoin:data.besoin||crmState.besoin, budget:data.budget||crmState.budget,
+                   delai:data.delai||crmState.delai, engagement:data.engagement||crmState.engagement,
+                   score: parseInt(data.score)||crmState.score, statut: data.statut||crmState.statut };
+        updateCRM(crmState);
+        action=data.action||'info';
+        if(data.resolu) stats.resolved++;
+        if(Array.isArray(data.suggestions)) chips=data.suggestions.slice(0,3);
+
+        upsertProspect(Object.assign({}, currentUser, crmState, {
+          transcript: buildTranscriptSnapshot(),
+          lastUpdated: new Date().toISOString()
+        }));
+
+        if(crmState.score >= HOT_LEAD_THRESHOLD && !hotLeadSent){ handleHotLead(); }
+      } else { stats.resolved++; }
+      updateStats();
+
+      appendMessage('bot', reply, (action==='transfert'||action==='form')?[]:chips);
+      if(action==='transfert' || crmState.score>=HOT_LEAD_THRESHOLD) setTimeout(showTransferCard,400);
+      if(action==='form') setTimeout(showFormCard,400);
+    }
+  }catch(err){
+    hideTyping();
+    console.error(err);
+    let msg="⚠️ Une erreur est survenue : "+(err.message||'connexion impossible')+".";
+    msg+="\n\nVérifiez votre connexion et réessayez. *Note : cette version fonctionne dans l'environnement Claude. Pour l'héberger sur le site d'Orientis Conseil International, l'appel à l'IA doit passer par un serveur intermédiaire qui protège la clé API.*";
+    appendMessage('bot', msg, ['Réessayer']);
+  }
+  isTyping=false;
+  document.getElementById('sendBtn').disabled=false;
+  document.getElementById('input').focus();
+}
+
+/* ════════════════════════ ESPACE ADMINISTRATEUR ════════════════════════ */
+function scoreCategory(score){ score=score||0; if(score>=HOT_LEAD_THRESHOLD) return 'chaud'; if(score>=30) return 'tiede'; return 'froid'; }
+function scoreLabel(cat){ return cat==='chaud' ? '🟢 Chaud' : cat==='tiede' ? '🟠 Tiède' : '⚪ Froid'; }
+
+function renderAdminDashboard(){
+  const arr = loadProspects();
+  const today = new Date().toDateString();
+  document.getElementById('kpi-total').textContent = arr.length;
+  document.getElementById('kpi-hot').textContent = arr.filter(function(p){ return (p.score||0) >= HOT_LEAD_THRESHOLD; }).length;
+  document.getElementById('kpi-avg').textContent = arr.length ? Math.round(arr.reduce(function(a,p){ return a+(p.score||0); },0)/arr.length) : 0;
+  document.getElementById('kpi-today').textContent = arr.filter(function(p){ return p.createdAt && new Date(p.createdAt).toDateString()===today; }).length;
+  renderAdminTable();
+}
+
+function renderAdminTable(){
+  const arr = loadProspects();
+  const search = (document.getElementById('adminSearch').value||'').toLowerCase();
+  const polF = document.getElementById('adminFilterPole').value;
+  const scoF = document.getElementById('adminFilterScore').value;
+
+  const filtered = arr.filter(function(p){
+    const matchSearch = !search || (p.prenom+' '+p.nom+' '+p.email).toLowerCase().indexOf(search)>-1;
+    const matchPole = !polF || p.pole===polF;
+    const matchScore = !scoF || scoreCategory(p.score)===scoF;
+    return matchSearch && matchPole && matchScore;
+  });
+
+  const tbody = document.getElementById('adminTableBody');
+  const emptyEl = document.getElementById('adminEmpty');
+  tbody.innerHTML = '';
+
+  if(!filtered.length){ emptyEl.style.display='block'; return; }
+  emptyEl.style.display='none';
+
+  filtered.forEach(function(p){
+    const cat = scoreCategory(p.score);
+    const tr = document.createElement('tr');
+    const dateStr = p.createdAt ? new Date(p.createdAt).toLocaleDateString('fr-FR') : '—';
+    tr.innerHTML =
+      '<td><div class="td-name">'+esc(p.prenom+' '+p.nom)+'</div><div class="td-sub">'+esc(p.id)+'</div></td>' +
+      '<td><div>'+esc(p.email)+'</div><div class="td-sub">'+esc(p.telephone)+'</div></td>' +
+      '<td>'+esc(p.niveau||'—')+'</td>' +
+      '<td>'+(p.pole ? '<span class="pole-pill">'+esc(POLE_LABELS[p.pole]||p.pole)+'</span>' : '<span class="td-sub">—</span>')+'</td>' +
+      '<td><span class="score-chip '+cat+'">'+scoreLabel(cat)+' · '+(p.score||0)+'</span></td>' +
+      '<td><span class="mail-status '+(p.emailSent?'sent':'pending')+'">'+(p.emailSent?'✅ Envoyé':(p.score>=HOT_LEAD_THRESHOLD?'⏳ En attente':'—'))+'</span></td>' +
+      '<td>'+dateStr+'</td>' +
+      '<td><div class="row-actions">' +
+        '<button class="icon-btn" title="Voir la conversation" onclick="viewTranscript(\''+p.id+'\')">👁</button>' +
+        '<button class="icon-btn danger" title="Supprimer" onclick="deleteProspect(\''+p.id+'\')">🗑</button>' +
+      '</div></td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function deleteProspect(id){
+  if(!confirm('Supprimer définitivement cette fiche prospect ?')) return;
+  const arr = loadProspects().filter(function(p){ return p.id!==id; });
+  saveProspects(arr);
+  renderAdminDashboard();
+}
+
+function viewTranscript(id){
+  const p = getProspectById(id);
+  if(!p) return;
+  document.getElementById('transcriptTitle').textContent = 'Conversation — ' + p.prenom + ' ' + p.nom;
+  document.getElementById('transcriptSub').textContent = p.email + ' · ' + p.telephone + ' · Score ' + (p.score||0) + '/100';
+  const body = document.getElementById('transcriptBody');
+  body.innerHTML = '';
+  const transcript = p.transcript || [];
+  if(!transcript.length){
+    body.innerHTML = '<p style="color:var(--muted);font-size:12.5px">Aucun échange enregistré pour ce prospect.</p>';
+  } else {
+    transcript.forEach(function(m){
+      const row = document.createElement('div');
+      row.className = 'msg-row ' + (m.role==='user' ? 'user' : 'bot');
+      row.innerHTML = '<b>'+(m.role==='user' ? (p.prenom+' '+p.nom) : 'OCI Bot')+'</b>' + esc(m.content);
+      body.appendChild(row);
+    });
+  }
+  document.getElementById('transcriptModal').classList.add('open');
+}
+function closeTranscript(){ document.getElementById('transcriptModal').classList.remove('open'); }
+
+function exportCSV(){
+  const arr = loadProspects();
+  if(!arr.length){ alert('Aucun prospect à exporter.'); return; }
+  const headers = ['ID','Prenom','Nom','Email','Telephone','Niveau','Pole','Besoin','Budget','Delai','Score','Statut','EmailEnvoye','DateCreation'];
+  const rows = arr.map(function(p){
+    return [p.id,p.prenom,p.nom,p.email,p.telephone,p.niveau,p.pole||'',p.besoin||'',p.budget||'',p.delai||'',p.score||0,p.statut||'',p.emailSent?'oui':'non',p.createdAt||'']
+      .map(function(v){ return '"'+String(v).replace(/"/g,'""')+'"'; }).join(',');
+  });
+  const csv = headers.join(',') + '\n' + rows.join('\n');
+  const blob = new Blob(['\ufeff'+csv], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'oci-bot-prospects-' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ════════════════════════ INITIALISATION GLOBALE ════════════════════════ */
+(function init(){
+  const u = getCurrentUser();
+  if(u){ startChat(u); } else { switchView('auth'); }
+})();
+</script>
+</body>
+</html>
